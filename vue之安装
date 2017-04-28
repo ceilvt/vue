@@ -16,6 +16,11 @@
 	
 二，环境搭建,
 此处跳过nodejs安装，不管是npm还是cnpm，装上能用就好。
+vum安装要求
+"engines": {
+    "node": ">= 4.0.0",
+    "npm": ">= 3.0.0"
+  },
 因为学习是从vum（基于vue开发的demo）开始入手的，所以安装vum,相关内容在 github资源https://github.com/vum-team/vum
 将github内容下载至本地vum-demo文件夹，cmd至当前项目目录，马上就要起飞了。
 1，npm install
