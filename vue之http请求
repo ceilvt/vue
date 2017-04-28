@@ -1,3 +1,49 @@
-https://github.com/imcvampire/vue-axios
+一，http请求
 
+https://github.com/imcvampire/vue-axios
 听说vue-source有坑，果断采用vue-axios，安装事宜见github
+
+说到通信，不得不说nodejs如何和非nodejs通信呢，静态文件的话json放到static里，通过/static/xxx.json访问
+this.axios.get('/static/home.json').then(function(reponse){
+        _self.items = reponse.data.latest;
+      });
+如何和php通信呢，不同域或不同端口，存在跨域问题，实际生产中如何开发呢。
+wamp和nodejs的相同域名，相同端口，是不是就可以了呢？
+很傻很天真，端口会被占用！！！
+
+ok,来解决跨域问题，上代码，只需要php端解决allow-domain的问题
+<?php  
+$ret = array(  
+    'name' => isset($_POST['name'])? $_POST['name'] : '小张',
+    'gender' => isset($_POST['gender'])? $_POST['gender'] : '小李'
+);  
+//以上两行我也看不懂，不过能解决问题就行
+  
+header('content-type:application:json;charset=utf8');  
+header('Access-Control-Allow-Origin:*');  
+header('Access-Control-Allow-Methods:POST');  
+header('Access-Control-Allow-Headers:x-requested-with,content-type');  
+  
+echo json_encode($ret);  
+?>  
+
+
+      
+二、select控件option渲染及选择，啥也不说直接上代码
+
+<select @change="changeID()" v-model="selected">
+    <option v-for="item in items" v-bind:value="item.appID">
+      {{ item.appID }}
+    </option>
+</select>
+
+data:function(){
+        return {
+          selected:0
+        }
+    },
+
+
+三，关于module.exports
+
+感觉非常棒，把每天的学习都记录下来~~
