@@ -1,0 +1,27 @@
+这一周见同事在折腾vue，过程颇为费劲，于是我也参与了进来，解决了一些问题
+一、vue运行环境
+  我们可以在 Vue.js 的官网上直接下载 vue.min.js 并用 <script> 标签引入。
+  <script src="https://cdn.bootcss.com/vue/2.2.2/vue.min.js"></script>
+
+    <div id="app"> <p>{{ message }}</p></div>
+    <script>
+    new Vue({
+      el: '#app',
+      data: {
+        message: 'Hello Vue.js!'
+      }
+    })
+    </script>
+    测试成功，div中已经正确显示了message的内容，but这样的打开方式似乎有点low。所以从现在开始，入坑吧。
+	
+二，环境搭建,
+此处跳过nodejs安装，不管是npm还是cnpm，装上能用就好。
+因为学习是从vum（基于vue开发的demo）开始入手的，所以安装vum,相关内容在 github资源https://github.com/vum-team/vum
+将github内容下载至本地vum-demo文件夹，cmd至当前项目目录，马上就要起飞了。
+1，npm install
+	安装相关依赖，依赖列表见package.json,此时，cmd命令窗口在嗖嗖的寻找资源
+2,npm run dev
+	浏览器会自动打开http://localhost:8080（端口可以另行修改）vum运行成功
+3，npm run build
+	会生成dist文件，里面包含了所有前端内容，布置上服务器上就可以运行啦~~~
+	
