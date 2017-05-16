@@ -1,0 +1,228 @@
+
+var lib = fl.getDocumentDOM().library;
+
+//res数组
+var resArr = [];
+
+//mc数组
+var mcArr = [];
+
+//mc对应的帧数组
+var frames;
+
+//mc对应的帧标签
+var labels;
+
+//要解析的元件字典
+var itemsDic;
+
+//要导出的总数
+var totalCount = 0;
+
+//当前解析的个数
+var currentCount = 0;
+
+//上一次解析的元件名
+var oldItemName = "";
+
+//当前解析的元件名
+var currentItemName;
+
+//当前解析的元件
+var currentItem;
+
+//支持导出的类型
+var types = ["movie clip" , "button" , "graphic"];
+
+function getPluginInfo(lang)
+{
+	pluginInfo = new Object();
+	pluginInfo.id = "egret";
+	pluginInfo.name = "egret";
+	pluginInfo.ext = "json";
+	pluginInfo.encoding = "UTF8";
+	pluginInfo.capabilities = new Object();
+	pluginInfo.capabilities.canRotate = true;
+	pluginInfo.capabilities.canTrim = true;
+	pluginInfo.capabilities.canShapePad = true;
+	pluginInfo.capabilities.canBorderPad = true;
+	pluginInfo.capabilities.canStackDuplicateFrames = true;
+
+	return pluginInfo;
+}
+
+function beginExport(meta)
+{
+	itemsDic = {};
+	var selectedItems = lib.getSelectedItems();
+	for(var i=0 ; i<selectedItems.length ; i++)
+	{
+		var name = selectedItems[i].name;
+		var symbolName = name.substring(name.lastIndexOf("/")+1);
+		if(types.indexOf(selectedItems[i].itemType) > -1)
+		{
+			totalCount++;
+			itemsDic[symbolName] = selectedItems[i];
+		}
+	}
+	return "";
+}
+
+function frameExport(frame){
+	currentItemName = frame.symbolName;
+	currentItem = itemsDic[currentItemName];
+	if(!currentItem)
+		return "";
+	if(currentItemName != oldItemName){
+		lastRect = null;
+		currentCount++;
+		frames = [];
+		labels = [];
+		mcArr.push({"mcName":currentItemName,"frameRate":fl.getDocumentDOM().frameRate,"labels":labels,"frames":frames});
+		oldItemName = currentItemName;
+	}
+	var itemFrames = currentItem.timeline.layers[0].frames;
+	var currentFrame = itemFrames[frame.frameNumber];
+	if(!currentFrame)
+		currentFrame = {name:""};
+	
+	addLabel(currentFrame.name,frame.frameNumber+1);
+	
+	var currentRect = frame.frame;
+	var currentPos = {"x":frame.offsetInSource.x-frame.registrationPoint.x,
+				   "y":frame.offsetInSource.y-frame.registrationPoint.y};
+	
+	var rectEqual = lastRect&&equal(lastRect,currentRect);
+	var posEqual = lastPos&&currentPos.x==lastPos.x&&currentPos.y==lastPos.y;
+	
+	if(rectEqual&&posEqual)
+	{
+		var lastFrame = frames[frames.length-1];
+		lastFrame.duration = lastFrame.duration+1;
+	}
+	else
+	{
+		if(!rectEqual)
+		{
+			addRes(frame.id, frame.frame);
+			frames.push(addFrame(frame.id, currentPos.x, currentPos.y, currentFrame.name));
+		}
+		else
+		{
+			var lastRes = resArr[resArr.length-1];
+			frames.push(addFrame(lastRes.name, currentPos.x, currentPos.y, currentFrame.name));
+		}
+	}
+	
+	lastPos = currentPos;
+	lastRect = currentRect;
+	
+	return "";
+}
+
+//前一个Res对应的rect对应的图片位置
+var lastRect;
+
+function addRes(name, rect)
+{
+	resArr.push({"name":name,"data":{"x":rect.x,"y":rect.y,"w":rect.w,"h":rect.h}});
+}
+
+function addLabel(name , frame)
+{
+	if(!name)
+		return;
+	if(labels.length>0&&labels[labels.length-1].name==name)
+		return;
+	labels.push({"name":name,"frame":frame});
+}
+
+//上一帧的位置
+var lastPos;
+
+function addFrame(resId, x, y, labelName) {
+	var frame = {};
+	frame.res = resId;
+	frame.x = x;
+	frame.y = y;
+	frame.duration = 1;
+	return frame;
+}
+
+function equal(rect1,rect2)
+{	
+	if(rect1.x==rect2.x&&rect1.y==rect2.y&&
+	rect1.w==rect2.w&&rect1.h==rect2.h)
+	{
+		return true;
+	}
+	return false;
+}
+
+function endExport(meta)
+{
+	//frames,resArr
+	
+	var s = "{";
+
+	var mc, mcStr, label, frame,frameStr;
+	var res, resStr;
+	
+	for(var i = 0, ilen = mcArr.length; i < ilen; i++){
+		mc = mcArr[i];
+		mcStr = "";
+		mcStr += "\"" + mc.mcName + "\":[";  
+		
+		mcStr += "\"@mc\",";
+		mcStr += "["+mc.frameRate+",";     
+		mcStr += "[";                      
+		
+		//帧循环开始
+		for(var frameIndex = 0; frameIndex < mc.frames.length; frameIndex++)
+		{
+			frame = mc.frames[frameIndex];
+			//frame.res
+			
+			frameStr = "";
+			if(frame.duration > 1){
+				frameStr += frame.x+","+frame.y+","+frame.duration+"]";
+			}
+			else
+			{
+				frameStr += frame.x+","+frame.y+"]";
+			}
+			//加入res内容
+			for(var resIndex = 0; resIndex < resArr.length; resIndex++)
+			{
+				resStr = "";
+				res = resArr[resIndex];
+				if(frame.res == res.name){
+					resStr += "["+res.data.x+","+res.data.y+","+res.data.w+","+res.data.h+",";
+					break;
+					}
+			}
+			//frames内容与res内容合并
+			mcStr += resStr + frameStr;
+			if(frameIndex != mc.frames.length-1){
+				mcStr += ",";
+				}
+			
+				
+		}
+		
+		//帧循环结束
+		
+		mcStr += "]";      
+		mcStr += "]";      
+		if(i < ilen-1)
+			mcStr += "],";
+		else
+			mcStr += "]";    
+		s += mcStr;
+	}
+	
+	s += "}";
+	
+	return s;
+}
+
