@@ -343,6 +343,5 @@ html,body{height: 100%;}
     }
 }
 #uppicBox,.imageBox{ background:#000; position:fixed; top:0; left:0;right:0;bottom:0; z-index:9999; cursor:pointer;}
-
 </style>
 
