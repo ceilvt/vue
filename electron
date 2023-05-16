@@ -1,2 +1,12 @@
 registry=https://registry.npm.taobao.org
 electron_mirror=https://npm.taobao.org/mirrors/electron/
+
+
+import ElesignCode from 'elesigncode/lib/core/elesigncode.vue'
+增加方法
+clear(){
+          return this.signcodeEx.clear()
+        }
+        
+vue-imgcut 修改
+
