@@ -1,0 +1,8 @@
+import ElesignCode from 'elesigncode/lib/core/elesigncode.vue'
+clear(){
+          return this.signcodeEx.clear()
+        }
+        
+        
+vue-imgcut 修改
+见imgcut文件
