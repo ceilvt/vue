@@ -10,5 +10,24 @@ electron路径修复
   }
   
   
+1、vue配合electron打包遇见的问题
+（1）electron使用element组件图标样式丢失
+
+module.exports = defineConfig({
+  transpileDependencies: true,
+  // 解决element-ui图标不显示
+  pluginOptions: {
+    electronBuilder: {
+      customFileProtocol: "./"
+    }
+  }
+})
+
+（2）electron打包之后，页面无法拖动
+
+-webkit-app-region: drag;
+
+-webkit-app-region: no-drag;
+
   
 
